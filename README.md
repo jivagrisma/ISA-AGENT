@@ -4,15 +4,23 @@
 
 
 
-# II Agent
+# ISA - Intelligent System Agent
 
-[![GitHub stars](https://img.shields.io/github/stars/Intelligent-Internet/ii-agent?style=social)](https://github.com/Intelligent-Internet/ii-agent/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/jivagrisma/ISA-AGENT?style=social)](https://github.com/jivagrisma/ISA-AGENT/stargazers)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Blog](https://img.shields.io/badge/Blog-II--Agent-blue)](https://ii.inc/web/blog/post/ii-agent)
-[![GAIA Benchmark](https://img.shields.io/badge/GAIA-Benchmark-green)](https://ii-agent-gaia.ii.inc/)
+[![Status](https://img.shields.io/badge/Status-Fully%20Functional-green)](https://github.com/jivagrisma/ISA-AGENT)
+[![AWS Bedrock](https://img.shields.io/badge/AWS-Bedrock%20Nova%20Pro-orange)](https://aws.amazon.com/bedrock/)
 </div>
 
-II-Agent is an open-source intelligent assistant designed to streamline and enhance workflows across multiple domains. It represents a significant advancement in how we interact with technology—shifting from passive tools to intelligent systems capable of independently executing complex tasks.
+ISA (Intelligent System Agent) is an open-source intelligent assistant designed to streamline and enhance workflows across multiple domains. It represents a significant advancement in how we interact with technology—shifting from passive tools to intelligent systems capable of independently executing complex tasks.
+
+## 🚀 **CURRENT STATUS: FULLY FUNCTIONAL**
+
+ISA is currently **100% operational** with the following active integrations:
+- ✅ **Amazon Nova Pro** (AWS Bedrock) for advanced AI processing
+- ✅ **Tavily API** for real-time web search capabilities
+- ✅ **React/Next.js Frontend** with modern WebSocket communication
+- ✅ **Automatic Web Search Detection** for up-to-date information
 
 
 
@@ -22,28 +30,30 @@ https://github.com/user-attachments/assets/d0eb7440-a6e2-4276-865c-a1055181bb33
 
 ## Overview
 
-II Agent is built around providing an agentic interface to Anthropic Claude models. It offers:
+ISA is built around providing an agentic interface to advanced AI models. It offers:
 
-- A CLI interface for direct command-line interaction
-- A WebSocket server that powers a modern React-based frontend
-- Integration with Google Cloud's Vertex AI for API access to Anthropic models
+- A simplified WebSocket server with direct AWS Bedrock integration
+- A modern React-based frontend with real-time communication
+- Integration with AWS Bedrock for access to Amazon Nova Pro
+- Real-time web search capabilities through Tavily API
+- Automatic detection of queries requiring current information
 
 ## Core Capabilities
 
-II-Agent is a versatile open-source assistant built to elevate your productivity across domains:
+ISA is a versatile open-source assistant built to elevate your productivity across domains:
 
-| Domain | What II‑Agent Can Do |
-|--------|----------------------|
-| Research & Fact‑Checking | Multistep web search, source triangulation, structured note‑taking, rapid summarization |
+| Domain | What ISA Can Do |
+|--------|-----------------|
+| Research & Fact‑Checking | **Real-time web search**, source triangulation, structured note‑taking, rapid summarization |
 | Content Generation | Blog & article drafts, lesson plans, creative prose, technical manuals, Website creations |
-| Data Analysis & Visualization | Cleaning, statistics, trend detection, charting, and automated report generation |
-| Software Development | Code synthesis, refactoring, debugging, test‑writing, and step‑by‑step tutorials across multiple languages |
+| Current Information | **Automatic detection** of queries needing up-to-date info (anime releases, news, trends) |
+| Software Development | Code synthesis, refactoring, debugging, test‑writing, and step‑by‑step tutorials |
 | Workflow Automation | Script generation, browser automation, file management, process optimization |
 | Problem Solving | Decomposition, alternative‑path exploration, stepwise guidance, troubleshooting |
 
 ## Methods
 
-The II-Agent system represents a sophisticated approach to building versatile AI agents. Our methodology centers on:
+The ISA system represents a sophisticated approach to building versatile AI agents. Our methodology centers on:
 
 1. **Core Agent Architecture and LLM Interaction**
    - System prompting with dynamically tailored context
@@ -95,7 +105,8 @@ You can view the full traces of some samples here: [GAIA Benchmark Traces](https
 
 - Python 3.10+
 - Node.js 18+ (for frontend)
-- Google Cloud project with Vertex AI API enabled or Anthropic API key
+- AWS Account with Bedrock access
+- Tavily API key for web search
 
 ## Environment
 
@@ -104,22 +115,26 @@ You can view the full traces of some samples here: [GAIA Benchmark Traces](https
 Create a `.env` file in the root directory with the following variables:
 
 ```bash
-# Image and Video Generation Tool
+# AWS Bedrock Configuration (Required)
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_DEFAULT_REGION=us-east-1
+
+# LLM Configuration
+LLM_PROVIDER=bedrock
+LLM_MODEL=nova-pro
+LLM_TEMPERATURE=0.7
+LLM_MAX_TOKENS=4096
+
+# Search Provider (Required for web search)
+TAVILY_API_KEY=your_tavily_api_key
+
+# Static Files
+STATIC_FILE_BASE_URL=http://localhost:8001/
+
+# Optional: Image and Video Generation
 OPENAI_API_KEY=your_openai_key
 OPENAI_AZURE_ENDPOINT=your_azure_endpoint
-# Search Provider
-TAVILY_API_KEY=your_tavily_key
-#JINA_API_KEY=your_jina_key
-#FIRECRAWL_API_KEY=your_firecrawl_key
-# For Image Search and better search results use SerpAPI
-#SERPAPI_API_KEY=your_serpapi_key 
-
-STATIC_FILE_BASE_URL=http://localhost:8000/
-
-#If you are using Anthropic client
-ANTHROPIC_API_KEY=
-#If you are using Goolge Vertex (recommended if you have permission extra throughput)
-#GOOGLE_APPLICATION_CREDENTIALS=
 ```
 
 ### Frontend Environment Variables
@@ -127,70 +142,57 @@ ANTHROPIC_API_KEY=
 For the frontend, create a `.env` file in the frontend directory:
 
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:8001
 ```
 
 ## Installation
 
-1. Clone the repository
-2. Set up Python environment:
+1. Clone the repository:
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   pip install -e .
+   git clone https://github.com/jivagrisma/ISA-AGENT.git
+   cd ISA-AGENT
    ```
 
-3. Set up frontend (optional):
+2. Set up Python environment:
+   ```bash
+   python -m venv venv_clean
+   source venv_clean/bin/activate  # On Windows: venv_clean\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. Set up frontend:
    ```bash
    cd frontend
    npm install
    ```
 
+4. Configure environment variables (see Environment section above)
+
 ## Usage
 
-### Command Line Interface
+### Quick Start (Recommended)
 
-If you want to use anthropic client, set `ANTHROPIC_API_KEY` in `.env` file and run:
-```bash
-python cli.py 
-```
+1. **Start the backend server:**
+   ```bash
+   source venv_clean/bin/activate
+   python simple_server.py
+   ```
 
-If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` in `.env` file and run:
-```bash
-python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION
-```
+2. **Start the frontend (in a separate terminal):**
+   ```bash
+   cd frontend
+   npm run dev
+   ```
 
-Options:
-- `--project-id`: Google Cloud project ID
-- `--region`: Google Cloud region (e.g., us-east5)
-- `--workspace`: Path to the workspace directory (default: ./workspace)
-- `--needs-permission`: Require permission before executing commands
-- `--minimize-stdout-logs`: Reduce the amount of logs printed to stdout
+3. **Open your browser to:** http://localhost:3001
 
-### Web Interface
+### Features Available
 
-1. Start the WebSocket server:
-
-When using Anthropic client:
-```bash
-export STATIC_FILE_BASE_URL=http://localhost:8000
-python ws_server.py --port 8000
-```
-
-When using Vertex:
-```bash
-export STATIC_FILE_BASE_URL=http://localhost:8000
-python ws_server.py --port 8000 --project-id YOUR_PROJECT_ID --region YOUR_REGION
-```
-
-2. Start the frontend (in a separate terminal):
-
-```bash
-cd frontend
-npm run dev
-```
-
-3. Open your browser to http://localhost:3000
+- **💬 Interactive Chat**: Real-time conversation with ISA
+- **🔍 Web Search**: Automatic detection and search for current information
+- **📁 File Upload**: Support for document processing
+- **💻 Code Integration**: VS Code workspace integration
+- **🌐 Browser Tools**: Web browsing and interaction capabilities
 
 ## Project Structure
 
@@ -204,7 +206,16 @@ npm run dev
 
 ## Conclusion
 
-The II-Agent framework, architected around the reasoning capabilities of large language models like Claude 3.7 Sonnet, presents a comprehensive and robust methodology for building versatile AI agents. Through its synergistic combination of a powerful LLM, a rich set of execution capabilities, an explicit mechanism for planning and reflection, and intelligent context management strategies, II-Agent is well-equipped to address a wide spectrum of complex, multi-step tasks. Its open-source nature and extensible design provide a strong foundation for continued research and development in the rapidly evolving field of agentic AI.
+The ISA framework, architected around the reasoning capabilities of Amazon Nova Pro through AWS Bedrock, presents a comprehensive and robust methodology for building versatile AI agents. Through its synergistic combination of a powerful LLM, real-time web search capabilities, an intuitive web interface, and intelligent context management strategies, ISA is well-equipped to address a wide spectrum of complex, multi-step tasks requiring both reasoning and current information. Its open-source nature and extensible design provide a strong foundation for continued research and development in the rapidly evolving field of agentic AI.
+
+## 🎯 **Current Implementation Status**
+
+ISA is **fully functional** and ready for production use with:
+- ✅ **Amazon Nova Pro Integration**: Complete AWS Bedrock setup
+- ✅ **Real-time Web Search**: Tavily API integration with automatic detection
+- ✅ **Modern Web Interface**: React/Next.js frontend with WebSocket communication
+- ✅ **File Processing**: Document upload and processing capabilities
+- ✅ **Development Tools**: VS Code integration and terminal access
 
 ## Acknowledgement
 

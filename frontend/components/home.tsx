@@ -53,6 +53,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
   const [activeTab, setActiveTab] = useState(TAB.BROWSER);
   const [currentActionData, setCurrentActionData] = useState<ActionStep>();
   const [activeFileCodeEditor, setActiveFileCodeEditor] = useState("");
@@ -170,7 +171,7 @@ export default function Home() {
   }, []);
 
   const handleEnhancePrompt = () => {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
+    if (!isWebSocketConnected || !socket) {
       toast.error("WebSocket connection is not open. Please try again.");
       return;
     }
@@ -283,7 +284,7 @@ export default function Home() {
 
     setMessages((prev) => [...prev, newUserMessage]);
 
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
+    if (!isWebSocketConnected || !socket) {
       toast.error("WebSocket connection is not open. Please try again.");
       setIsLoading(false);
       return;
@@ -310,12 +311,11 @@ export default function Home() {
     // Send the query using the existing socket connection
     socket.send(
       JSON.stringify({
-        type: "query",
-        content: {
-          text: newQuestion,
-          resume: messages.length > 0,
-          files: uploadedFiles?.map((file) => `.${file}`),
-        },
+        type: "message",
+        content: newQuestion,
+        device_id: deviceId,
+        resume: messages.length > 0,
+        files: uploadedFiles?.map((file) => `.${file}`),
       })
     );
   };
@@ -484,6 +484,7 @@ export default function Home() {
     type: AgentEvent;
     content: Record<string, unknown>;
   }) => {
+    console.log("🎯 Event received:", data.type, data);
     switch (data.type) {
       case AgentEvent.USER_MESSAGE:
         setMessages((prev) => [
@@ -665,6 +666,9 @@ export default function Home() {
         break;
 
       case AgentEvent.AGENT_RESPONSE:
+        console.log("🤖 AGENT_RESPONSE received:", data);
+        console.log("📝 Content:", data.content);
+        console.log("📄 Text:", data.content.text);
         setMessages((prev) => [
           ...prev,
           {
@@ -696,6 +700,12 @@ export default function Home() {
         setIsUploading(false);
         setIsLoading(false);
         break;
+
+      default:
+        console.log("⚠️ Unhandled event type:", data.type);
+        console.log("📋 Event data:", data);
+        console.log("🔍 Available AgentEvent values:", Object.values(AgentEvent));
+        break;
     }
   };
 
@@ -715,12 +725,19 @@ export default function Home() {
     // Connect to WebSocket when the component mounts
     const connectWebSocket = () => {
       const params = new URLSearchParams({ device_id: deviceId });
-      const ws = new WebSocket(
-        `${process.env.NEXT_PUBLIC_API_URL}/ws?${params.toString()}`
-      );
+      const wsUrl = `${process.env.NEXT_PUBLIC_API_URL}?${params.toString()}`;
+
+      console.log("🔌 Intentando conectar WebSocket:", wsUrl);
+      console.log("📱 Device ID:", deviceId);
+      console.log("🎬 Replay Mode:", isReplayMode);
+
+      const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log("WebSocket connection established");
+        console.log("✅ WebSocket connection established");
+        console.log("🔗 WebSocket readyState:", ws.readyState);
+        setSocket(ws);
+        setIsWebSocketConnected(true);
         // Request workspace info immediately after connection
         ws.send(
           JSON.stringify({
@@ -732,34 +749,53 @@ export default function Home() {
 
       ws.onmessage = (event) => {
         try {
+          console.log("📦 Raw WebSocket data:", event.data);
           const data = JSON.parse(event.data);
-          handleEvent({ ...data, id: Date.now().toString() });
+          console.log("📥 WebSocket message received:", data.type);
+          console.log("📋 Parsed data:", data);
+
+          // Crear el evento con la estructura esperada
+          const eventData = {
+            id: Date.now().toString(),
+            type: data.type,
+            content: data.content || {}
+          };
+          console.log("🎯 Calling handleEvent with:", eventData);
+          handleEvent(eventData);
         } catch (error) {
-          console.error("Error parsing WebSocket data:", error);
+          console.error("❌ Error parsing WebSocket data:", error);
+          console.error("📦 Raw data was:", event.data);
         }
       };
 
       ws.onerror = (error) => {
-        console.log("WebSocket error:", error);
+        console.error("❌ WebSocket error:", error);
         toast.error("WebSocket connection error");
       };
 
-      ws.onclose = () => {
-        console.log("WebSocket connection closed");
+      ws.onclose = (event) => {
+        console.log("🔌 WebSocket connection closed:", event.code, event.reason);
         setSocket(null);
+        setIsWebSocketConnected(false);
       };
 
-      setSocket(ws);
+      // Don't set socket until connection is established (in onopen)
     };
 
     // Only connect if we have a device ID AND we're not viewing a session history
+    console.log("🔍 Checking connection conditions - deviceId:", !!deviceId, "isReplayMode:", isReplayMode);
+
     if (deviceId && !isReplayMode) {
+      console.log("🚀 Starting WebSocket connection...");
       connectWebSocket();
+    } else {
+      console.log("⏸️ WebSocket connection skipped - missing deviceId or in replay mode");
     }
 
     // Clean up the WebSocket connection when the component unmounts
     return () => {
       if (socket) {
+        console.log("🧹 Cleaning up WebSocket connection");
         socket.close();
       }
     };
@@ -795,7 +831,7 @@ export default function Home() {
       {!isInChatView && (
         <Image
           src="/logo-only.png"
-          alt="II-Agent Logo"
+          alt="ISA Logo"
           width={80}
           height={80}
           className="rounded-sm"
@@ -817,13 +853,13 @@ export default function Home() {
           {isInChatView && (
             <Image
               src="/logo-only.png"
-              alt="II-Agent Logo"
+              alt="ISA Logo"
               width={40}
               height={40}
               className="rounded-sm"
             />
           )}
-          {`II-Agent`}
+          {`ISA`}
         </motion.h1>
         {isInChatView ? (
           <div className="flex gap-x-2">
@@ -852,7 +888,7 @@ export default function Home() {
           <AnimatePresence mode="wait">
             {!isInChatView ? (
               <QuestionInput
-                placeholder="Give II-Agent a task to work on..."
+                placeholder="Give ISA a task to work on..."
                 value={currentQuestion}
                 setValue={setCurrentQuestion}
                 handleKeyDown={handleKeyDown}
@@ -861,7 +897,7 @@ export default function Home() {
                 isUploading={isUploading}
                 isUseDeepResearch={isUseDeepResearch}
                 setIsUseDeepResearch={setIsUseDeepResearch}
-                isDisabled={!socket || socket.readyState !== WebSocket.OPEN}
+                isDisabled={!isWebSocketConnected}
                 isGeneratingPrompt={isGeneratingPrompt}
                 handleEnhancePrompt={handleEnhancePrompt}
               />
