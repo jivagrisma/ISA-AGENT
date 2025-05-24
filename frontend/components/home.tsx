@@ -852,10 +852,32 @@ export default function Home() {
   }, [messages?.length]);
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-screen transition-colors duration-300 ${
+    <div className={`relative flex flex-col items-center justify-center min-h-screen transition-colors duration-300 ${
       isDarkMode ? "bg-[#191E1B] text-white" : "bg-gray-50 text-gray-900"
     }`}>
       <SidebarButton />
+
+      {/* Theme Toggle Button - Fixed position */}
+      <div className="fixed top-6 right-6 z-50">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleTheme}
+          className={`p-3 rounded-full transition-all duration-300 hover:scale-110 shadow-lg backdrop-blur-sm ${
+            isDarkMode
+              ? "hover:bg-gray-800/80 text-yellow-400 bg-gray-900/50 border border-gray-700/50"
+              : "hover:bg-white/80 text-orange-500 bg-white/50 border border-gray-200/50"
+          }`}
+          title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {isDarkMode ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
+        </Button>
+      </div>
+
       {!isInChatView && (
         <Image
           src="/logo-only.png"
@@ -889,41 +911,22 @@ export default function Home() {
           )}
           {`ISA`}
         </motion.h1>
-        <div className="flex items-center gap-x-2">
-          {/* Theme Toggle Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className={`p-2 rounded-full transition-all duration-300 hover:scale-110 ${
-              isDarkMode
-                ? "hover:bg-gray-800 text-yellow-400"
-                : "hover:bg-gray-200 text-orange-500"
-            }`}
-            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {isDarkMode ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button>
-
-          {isInChatView && (
-            <>
-              <Button
-                className="cursor-pointer h-10"
-                variant="outline"
-                onClick={handleShare}
-              >
-                <Share /> Share
-              </Button>
-              <Button className="cursor-pointer" onClick={resetChat}>
-                <X className="size-5" />
-              </Button>
-            </>
-          )}
-        </div>
+        {isInChatView ? (
+          <div className="flex items-center gap-x-2">
+            <Button
+              className="cursor-pointer h-10"
+              variant="outline"
+              onClick={handleShare}
+            >
+              <Share /> Share
+            </Button>
+            <Button className="cursor-pointer" onClick={resetChat}>
+              <X className="size-5" />
+            </Button>
+          </div>
+        ) : (
+          <div />
+        )}
       </div>
       {isLoadingSession ? (
         <div className="flex flex-col items-center justify-center p-8">
