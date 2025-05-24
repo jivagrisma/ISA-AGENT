@@ -9,6 +9,8 @@ import {
   X,
   Loader2,
   Share,
+  Sun,
+  Moon,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -71,6 +73,7 @@ export default function Home() {
   );
   const [browserUrl, setBrowserUrl] = useState("");
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   const isReplayMode = useMemo(() => !!searchParams.get("id"), [searchParams]);
 
@@ -169,6 +172,25 @@ export default function Home() {
     // Set the device ID in state
     setDeviceId(existingDeviceId);
   }, []);
+
+  // Initialize theme from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("isa-theme");
+    if (savedTheme) {
+      setIsDarkMode(savedTheme === "dark");
+    }
+  }, []);
+
+  // Save theme to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("isa-theme", isDarkMode ? "dark" : "light");
+    // Apply theme to document
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDarkMode]);
 
   const handleEnhancePrompt = () => {
     if (!isWebSocketConnected || !socket) {
@@ -336,6 +358,10 @@ export default function Home() {
     setMessages([]);
     setIsLoading(false);
     setIsCompleted(false);
+  };
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
   };
 
   const handleOpenVSCode = () => {
@@ -826,7 +852,9 @@ export default function Home() {
   }, [messages?.length]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#191E1B]">
+    <div className={`flex flex-col items-center justify-center min-h-screen transition-colors duration-300 ${
+      isDarkMode ? "bg-[#191E1B] text-white" : "bg-gray-50 text-gray-900"
+    }`}>
       <SidebarButton />
       {!isInChatView && (
         <Image
@@ -838,7 +866,7 @@ export default function Home() {
         />
       )}
       <div
-        className={`flex justify-between w-full ${
+        className={`flex justify-between items-start w-full ${
           !isInChatView ? "pt-0 pb-8" : "p-4"
         }`}
       >
@@ -861,27 +889,50 @@ export default function Home() {
           )}
           {`ISA`}
         </motion.h1>
-        {isInChatView ? (
-          <div className="flex gap-x-2">
-            <Button
-              className="cursor-pointer h-10"
-              variant="outline"
-              onClick={handleShare}
-            >
-              <Share /> Share
-            </Button>
-            <Button className="cursor-pointer" onClick={resetChat}>
-              <X className="size-5" />
-            </Button>
-          </div>
-        ) : (
-          <div />
-        )}
+        <div className="flex items-center gap-x-2">
+          {/* Theme Toggle Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className={`p-2 rounded-full transition-all duration-300 hover:scale-110 ${
+              isDarkMode
+                ? "hover:bg-gray-800 text-yellow-400"
+                : "hover:bg-gray-200 text-orange-500"
+            }`}
+            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDarkMode ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+
+          {isInChatView && (
+            <>
+              <Button
+                className="cursor-pointer h-10"
+                variant="outline"
+                onClick={handleShare}
+              >
+                <Share /> Share
+              </Button>
+              <Button className="cursor-pointer" onClick={resetChat}>
+                <X className="size-5" />
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       {isLoadingSession ? (
         <div className="flex flex-col items-center justify-center p-8">
-          <Loader2 className="h-8 w-8 text-white animate-spin mb-4" />
-          <p className="text-white text-lg">Loading session history...</p>
+          <Loader2 className={`h-8 w-8 animate-spin mb-4 ${
+            isDarkMode ? "text-white" : "text-gray-600"
+          }`} />
+          <p className={`text-lg ${
+            isDarkMode ? "text-white" : "text-gray-600"
+          }`}>Loading session history...</p>
         </div>
       ) : (
         <LayoutGroup>
